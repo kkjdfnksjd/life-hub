@@ -1,7 +1,7 @@
 import { APP_STORAGE_KEY, encryptState, decryptState, clearLegacyStorage, clearSecureStorage } from "../utils/crypto";
 import { EMPTY_STATE, EMPTY_INVESTMENTS } from "../utils/constants";
-const MODE = "local";
-const CF_API_BASE = "";
+const MODE = "cloudflare";
+const CF_API_BASE = "https://life-hub-api.douzieme-phenol-4h.workers.dev";
 export function hasExistingData() { return !!localStorage.getItem(APP_STORAGE_KEY); }
 export async function saveState(state, passphrase) {
   const encrypted = await encryptState(state, passphrase);

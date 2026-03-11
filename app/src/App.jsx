@@ -89,7 +89,7 @@ export default function App() {
   );
 
   return (
-    <div style={{ minHeight: "100vh", maxWidth: 430, margin: "0 auto", background: C.bg, color: C.text, position: "relative", fontFamily: "-apple-system,sans-serif", paddingTop: "max(16px,env(safe-area-inset-top))", paddingBottom: "max(90px,calc(90px+env(safe-area-inset-bottom)))" }}>
+    <div style={{ minHeight: "100vh", maxWidth: 9999, margin: "0 auto", background: C.bg, color: C.text, position: "relative", fontFamily: "-apple-system,sans-serif", paddingTop: "max(16px,env(safe-area-inset-top))", paddingBottom: "max(90px,calc(90px+env(safe-area-inset-bottom)))" }}>
       <div style={{ height: 18 }} />
       <div style={{ position: "fixed", top: "max(14px,env(safe-area-inset-top))", right: 16, zIndex: 120, display: "flex", gap: 8 }}>
         <TopBtn onClick={() => setShowChat(true)}><Icons.MessageCircle size={18} color={C.accent} /></TopBtn>
