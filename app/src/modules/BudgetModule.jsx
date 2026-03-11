@@ -133,15 +133,41 @@ function TOBHelper() {
 }
 
 function NewsFeed({ investments }) {
-  const [articles, setArticles] = useState([]); const [loading, setLoading] = useState(false);
-  const keywords = investments.flatMap((p) => { const d = PORTFOLIOS.find((x) => x.id === p.id); return d?.keywords || []; });
-  const refresh = async () => { setLoading(true); const data = await fetchNewsFeed(keywords); setArticles(data); setLoading(false); };
+  const [articles, setArticles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const keywords = investments.flatMap((p) => {
+    const d = PORTFOLIOS.find((x) => x.id === p.id);
+    return d?.keywords || [];
+  });
+  const refresh = async () => {
+    setLoading(true);
+    try {
+      const data = await fetchNewsFeed(keywords);
+      setArticles(Array.isArray(data) ? data : []);
+    } catch(e) { console.error(e); }
+    setLoading(false);
+  };
   useEffect(() => { refresh(); }, []);
   return (<div style={{ padding: "0 20px 20px" }}>
-    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}><div style={{ display: "flex", alignItems: "center", gap: 8 }}><Icons.Rss size={16} color={C.accent} /><span style={{ fontSize: 13, fontWeight: 600, color: C.text2, textTransform: "uppercase", letterSpacing: 0.5 }}>Fil d'actualité</span></div><button onClick={refresh} disabled={loading} style={{ background: C.accentLight, border: "none", borderRadius: 8, padding: "5px 12px", fontSize: 12, fontWeight: 600, color: C.accent, cursor: "pointer" }}>{loading ? "..." : "Rafra\u00eechir"}</button></div>
-    {articles.length === 0 ? <Card><div style={{ padding: "32px 20px", textAlign: "center" }}><div style={{ fontSize: 40, marginBottom: 12 }}>{"\u{1F4E1}"}</div><div style={{ fontSize: 15, fontWeight: 600, marginBottom: 6 }}>Flux non connecté</div><div style={{ fontSize: 13, color: C.text3, lineHeight: 1.5 }}>Le fil sera alimenté une fois le backend Cloudflare connecté.</div><div style={{ marginTop: 12, display: "flex", flexWrap: "wrap", gap: 6, justifyContent: "center" }}>{keywords.slice(0, 6).map((kw, i) => (<span key={i} style={{ fontSize: 11, background: C.accentLight, color: C.accent, padding: "3px 10px", borderRadius: 6, fontWeight: 500 }}>{kw}</span>))}</div></div></Card> : articles.map((a, i) => (<Card key={i} style={{ marginBottom: 8 }}><a href={a.url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none", color: C.text, display: "block", padding: "14px 16px" }}><div style={{ fontSize: 14, fontWeight: 600, lineHeight: 1.4, marginBottom: 6 }}>{a.title}</div><div style={{ fontSize: 12, color: C.text3, display: "flex", gap: 8 }}><span>{a.source}</span><span>{a.date}</span></div></a></Card>))}
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <Icons.Rss size={16} color={C.accent} />
+        <span style={{ fontSize: 13, fontWeight: 600, color: C.text2, textTransform: "uppercase" }}>Actualites</span>
+      </div>
+      <button onClick={refresh} disabled={loading} style={{ background: C.accentLight, border: "none", borderRadius: 8, padding: "5px 12px", fontSize: 12, fontWeight: 600, color: C.accent, cursor: "pointer" }}>{loading ? "..." : "Rafraichir"}</button>
+    </div>
+    {loading ? <Card><Empty text="Chargement..." /></Card> : articles.length === 0 ? <Card><Empty text="Aucune actualite pour le moment." /></Card> : articles.map((a, i) => (
+      <Card key={i} style={{ marginBottom: 8 }}>
+        <a href={a.url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none", color: C.text, display: "block", padding: "14px 16px" }}>
+          <div style={{ fontSize: 14, fontWeight: 600, lineHeight: 1.4, marginBottom: 4 }}>{a.title}</div>
+          {a.summary && <div style={{ fontSize: 12, color: C.text2, lineHeight: 1.4, marginBottom: 4 }}>{a.summary}</div>}
+          <div style={{ fontSize: 11, color: C.text3, display: "flex", gap: 8 }}><span>{a.source}</span><span>{a.date}</span>{a.ticker && <span style={{ background: C.accentLight, color: C.accent, padding: "1px 6px", borderRadius: 4, fontWeight: 600 }}>{a.ticker}</span>}</div>
+        </a>
+      </Card>
+    ))}
   </div>);
 }
+
 function BudgetSub({ transactions, setTransactions, monthlyBudget, setMonthlyBudget }) {
   const [showAdd, setShowAdd] = useState(false); const [view, setView] = useState("overview"); const [editB, setEditB] = useState(false);
   const cm = today.getFullYear() + "-" + String(today.getMonth() + 1).padStart(2, "0");
