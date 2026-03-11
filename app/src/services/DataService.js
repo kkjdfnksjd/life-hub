@@ -3,6 +3,7 @@ import { EMPTY_STATE, EMPTY_INVESTMENTS } from "../utils/constants";
 
 const MODE = "cloudflare";
 const CF_API_BASE = "https://life-hub-api.douzieme-phenol-4h.workers.dev";
+const VALID_TABS = new Set(["home", "todos", "budget", "calendar", "notes"]);
 
 export function hasExistingData() {
   return !!localStorage.getItem(APP_STORAGE_KEY);
@@ -20,19 +21,23 @@ export async function loadState(passphrase) {
 
   const decrypted = await decryptState(JSON.parse(raw), passphrase);
 
+  const activeTab = VALID_TABS.has(decrypted?.activeTab) ? decrypted.activeTab : "home";
+
   return {
     ...EMPTY_STATE,
     ...decrypted,
+    activeTab,
     investments:
-      Array.isArray(decrypted.investments) && decrypted.investments.length > 0
+      Array.isArray(decrypted?.investments) && decrypted.investments.length > 0
         ? decrypted.investments
         : EMPTY_INVESTMENTS,
-    notes: Array.isArray(decrypted.notes) ? decrypted.notes : [],
-    newsFeed: Array.isArray(decrypted.newsFeed) ? decrypted.newsFeed : [],
-    chatHistory: Array.isArray(decrypted.chatHistory) ? decrypted.chatHistory : [],
-    todos: Array.isArray(decrypted.todos) ? decrypted.todos : [],
-    events: Array.isArray(decrypted.events) ? decrypted.events : [],
-    transactions: Array.isArray(decrypted.transactions) ? decrypted.transactions : [],
+    notes: Array.isArray(decrypted?.notes) ? decrypted.notes : [],
+    newsFeed: Array.isArray(decrypted?.newsFeed) ? decrypted.newsFeed : [],
+    chatHistory: Array.isArray(decrypted?.chatHistory) ? decrypted.chatHistory : [],
+    todos: Array.isArray(decrypted?.todos) ? decrypted.todos : [],
+    events: Array.isArray(decrypted?.events) ? decrypted.events : [],
+    transactions: Array.isArray(decrypted?.transactions) ? decrypted.transactions : [],
+    monthlyBudget: Number.isFinite(Number(decrypted?.monthlyBudget)) ? Number(decrypted.monthlyBudget) : EMPTY_STATE.monthlyBudget,
   };
 }
 
@@ -82,14 +87,8 @@ export async function fetchEtfPrices(isins = []) {
 
       const data = await r.json();
 
-      if (data?.disabled) {
-        return [];
-      }
-
-      if (Array.isArray(data?.items)) {
-        return data.items;
-      }
-
+      if (data?.disabled) return [];
+      if (Array.isArray(data?.items)) return data.items;
       if (data?.byIsin && typeof data.byIsin === "object") {
         return Object.values(data.byIsin).filter((x) => x && !x.error);
       }
