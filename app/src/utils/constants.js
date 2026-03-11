@@ -27,8 +27,8 @@ export const BUDGET_CATS = {
     { id: "courses_b", label: "Courses", icon: "\u{1F6D2}", color: C.red },
     { id: "transport", label: "Transport", icon: "\u{1F697}", color: C.accent },
     { id: "loisirs", label: "Loisirs", icon: "\u{1F3AC}", color: C.pink },
-    { id: "sante", label: "Sant\u00e9", icon: "\u{1F3E5}", color: C.green },
-    { id: "renovation", label: "R\u00e9novation", icon: "\u{1F528}", color: C.purple },
+    { id: "sante", label: "Santé", icon: "\u{1F3E5}", color: C.green },
+    { id: "renovation", label: "Rénovation", icon: "\u{1F528}", color: C.purple },
     { id: "abonnements", label: "Abonnements", icon: "\u{1F4F1}", color: C.text2 },
     { id: "autre_dep", label: "Autre", icon: "\u{1F4E6}", color: C.text3 },
   ],
@@ -36,26 +36,26 @@ export const BUDGET_CATS = {
 export const PORTFOLIOS = [
   { id: "curvo", name: "Curvo", icon: "\u{1F331}", color: C.green, type: "DCA mensuel", keywords: ["MSCI World ESG", "Curvo", "index fund Europe"] },
   { id: "trade_republic", name: "Trade Republic", icon: "\u{1F4CA}", color: C.accent, type: "ETFs", keywords: ["IWDA", "VWCE", "IEMA", "XESC", "ETF Europe"] },
-  { id: "retraite", name: "Assurance Retraite", icon: "\u{1F3E6}", color: C.purple, type: "\u00c9pargne pension", keywords: ["pension Belgique", "\u00e9pargne pension"] },
+  { id: "retraite", name: "Assurance Retraite", icon: "\u{1F3E6}", color: C.purple, type: "Épargne pension", keywords: ["pension Belgique", "épargne pension"] },
 ];
 export const EVENT_CATS = [
   { id: "perso", label: "Perso", icon: "\u{1F389}", color: C.accent },
   { id: "pro", label: "Travail", icon: "\u{1F4BC}", color: C.green },
   { id: "anniversaire", label: "Anniversaire", icon: "\u{1F382}", color: C.pink },
   { id: "finance", label: "Finance", icon: "\u{1F4B6}", color: C.orange },
-  { id: "renovation", label: "R\u00e9novation", icon: "\u{1F528}", color: C.purple },
+  { id: "renovation", label: "Rénovation", icon: "\u{1F528}", color: C.purple },
   { id: "tache", label: "T\u00e2che", icon: "\u2705", color: C.teal },
 ];
 export const NOTE_CATS = [
-  { id: "film", label: "Films / S\u00e9ries", icon: "\u{1F3AC}", color: C.red },
+  { id: "film", label: "Films / Séries", icon: "\u{1F3AC}", color: C.red },
   { id: "livre", label: "Livres", icon: "\u{1F4DA}", color: C.orange },
-  { id: "expo", label: "Expos / Mus\u00e9es", icon: "\u{1F3A8}", color: C.purple },
+  { id: "expo", label: "Expos / Musées", icon: "\u{1F3A8}", color: C.purple },
   { id: "resto", label: "Restos / Bars", icon: "\u{1F37D}\uFE0F", color: C.green },
   { id: "musique", label: "Musique / Podcasts", icon: "\u{1F3B5}", color: C.pink },
   { id: "voyage", label: "Voyages / Lieux", icon: "\u2708\uFE0F", color: C.teal },
 ];
 export const NOTE_STATUSES = [
-  { id: "to_see", label: "\u00c0 d\u00e9couvrir", color: C.orange },
+  { id: "to_see", label: "À découvrir", color: C.orange },
   { id: "in_progress", label: "En cours", color: C.accent },
   { id: "done", label: "Vu / Lu / Fait", color: C.green },
 ];

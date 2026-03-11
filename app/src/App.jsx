@@ -44,8 +44,8 @@ export default function App() {
 
   const onCreate = async (pass, confirm) => {
     setAuthErr("");
-    if (pass.length < 8) { setAuthErr("Min. 8 caracteres."); return; }
-    if (pass !== confirm) { setAuthErr("Differents."); return; }
+    if (pass.length < 8) { setAuthErr("Min. 8 caractères."); return; }
+    if (pass !== confirm) { setAuthErr("Différents."); return; }
     try {
       setBusy(true);
       const s = await DS.createVault(pass);
@@ -71,7 +71,7 @@ export default function App() {
   };
 
   const onReset = () => {
-    if (!window.confirm("Effacer toutes les donnees ?")) return;
+    if (!window.confirm("Effacer toutes les données ?")) return;
     DS.resetAll(); setSp(""); setIsUnlocked(false);
     setSt(EMPTY_STATE); setAuthMode("create");
   };
@@ -91,7 +91,7 @@ export default function App() {
   return (
     <div style={{ minHeight: "100vh", maxWidth: 430, margin: "0 auto", background: C.bg, color: C.text, position: "relative", fontFamily: "-apple-system,sans-serif", paddingTop: "max(16px,env(safe-area-inset-top))", paddingBottom: "max(90px,calc(90px+env(safe-area-inset-bottom)))" }}>
       <div style={{ height: 18 }} />
-      <div style={{ position: "fixed", top: "max(14px,env(safe-area-inset-top))", right: "max(14px,calc(50% - 201px))", zIndex: 120, display: "flex", gap: 8 }}>
+      <div style={{ position: "fixed", top: "max(14px,env(safe-area-inset-top))", right: 16, zIndex: 120, display: "flex", gap: 8 }}>
         <TopBtn onClick={() => setShowChat(true)}><Icons.MessageCircle size={18} color={C.accent} /></TopBtn>
         <TopBtn onClick={() => setShowSettings(true)}><Icons.Settings size={18} color={C.text2} /></TopBtn>
         <TopBtn onClick={onLock}><Icons.Lock size={18} color={C.text2} /></TopBtn>
@@ -133,10 +133,10 @@ function UnlockScreen({ mode, error, busy, onCreate, onUnlock, hasExisting }) {
             <Icons.Lock size={24} color={C.accent} />
           </div>
           <h1 style={{ fontSize: 28, fontWeight: 700, margin: "0 0 8px" }}>
-            {isCreate ? "Creer ton coffre" : "Deverrouiller"}
+            {isCreate ? "Créer ton coffre" : "Déverrouiller"}
           </h1>
           <p style={{ margin: "0 0 18px", fontSize: 14, lineHeight: 1.5, color: C.text2 }}>
-            {isCreate ? "Donnees chiffrees localement." : "Entre ton mot de passe."}
+            {isCreate ? "Données chiffrées localement." : "Entre ton mot de passe."}
           </p>
           <input ref={r} type="password" placeholder="Mot de passe"
             value={p} onChange={(e) => setP(e.target.value)}
@@ -151,9 +151,9 @@ function UnlockScreen({ mode, error, busy, onCreate, onUnlock, hasExisting }) {
             <div style={{ marginTop: 12, padding: "10px 12px", borderRadius: 10, background: C.redLight, color: C.red, fontSize: 13, fontWeight: 600 }}>{error}</div>
           )}
           {isCreate ? (
-            <SubmitBtn disabled={busy || !p || !c} onClick={() => onCreate(p, c)} text={busy ? "Creation..." : "Creer et ouvrir"} />
+            <SubmitBtn disabled={busy || !p || !c} onClick={() => onCreate(p, c)} text={busy ? "Création..." : "Créer et ouvrir"} />
           ) : (
-            <SubmitBtn disabled={busy || !p} onClick={() => onUnlock(p)} text={busy ? "Dechiffrement..." : "Deverrouiller"} />
+            <SubmitBtn disabled={busy || !p} onClick={() => onUnlock(p)} text={busy ? "Déchiffrement..." : "Déverrouiller"} />
           )}
         </Card>
       </div>

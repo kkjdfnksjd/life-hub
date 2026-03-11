@@ -33,7 +33,7 @@ export function SubmitBtn({ disabled, onClick, text, color = C.accent }) { retur
 export function SegToggle({ options, active, onChange }) { return (<div style={{ display: "flex", margin: "14px 20px 12px", background: C.separator, borderRadius: 10, padding: 2 }}>{options.map((t) => (<button key={t.id} onClick={() => onChange(t.id)} style={{ flex: 1, padding: "9px 0", borderRadius: 8, border: "none", background: active === t.id ? C.card : "transparent", color: active === t.id ? C.text : C.text2, fontSize: 14, fontWeight: 600, cursor: "pointer", boxShadow: active === t.id ? "0 1px 3px rgba(0,0,0,.08)" : "none" }}>{t.label}</button>))}</div>); }
 export function LocationLink({ location }) {
   if (!location) return null;
-  return (<a href={mapsUrl(location)} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} style={{ fontSize: 11, color: C.accent, display: "flex", alignItems: "center", gap: 3, textDecoration: "none", marginTop: 2 }}><Icons.MapPin size={11} color={C.accent} />{location.length > 35 ? location.slice(0, 35) + "\u2026" : location}</a>);
+  return (<a href={mapsUrl(location)} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} style={{ fontSize: 11, color: C.accent, display: "flex", alignItems: "center", gap: 3, textDecoration: "none", marginTop: 2 }}><Icons.MapPin size={11} color={C.accent} />{location.length > 35 ? location.slice(0, 35) + "…" : location}</a>);
 }
 export const inputStyle = { width: "100%", padding: "14px 16px", fontSize: 16, border: "1px solid " + C.separator, borderRadius: 12, outline: "none", background: C.bg, color: C.text, boxSizing: "border-box", fontFamily: "inherit" };
 export const focusBorder = (e) => (e.target.style.borderColor = C.accent);

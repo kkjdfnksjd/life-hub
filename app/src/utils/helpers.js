@@ -1,8 +1,8 @@
 export const uid = () => Math.random().toString(36).slice(2, 10);
 export const fmt = (n) => new Intl.NumberFormat("fr-BE", { style: "currency", currency: "EUR" }).format(n);
 export const fmtPct = (n) => (n >= 0 ? "+" : "") + n.toFixed(1) + "%";
-export const MN = ["Janvier","F\u00e9vrier","Mars","Avril","Mai","Juin","Juillet","Ao\u00fbt","Septembre","Octobre","Novembre","D\u00e9cembre"];
-export const MN_S = ["Jan","F\u00e9v","Mar","Avr","Mai","Juin","Juil","Ao\u00fbt","Sep","Oct","Nov","D\u00e9c"];
+export const MN = ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
+export const MN_S = ["Jan","Fév","Mar","Avr","Mai","Juin","Juil","Août","Sep","Oct","Nov","Déc"];
 export const DN = ["Lun","Mar","Mer","Jeu","Ven","Sam","Dim"];
 export const toKey = (d) => d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
 export const today = new Date();

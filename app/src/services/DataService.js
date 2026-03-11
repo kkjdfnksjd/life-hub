@@ -36,5 +36,5 @@ export async function sendChatMessage(message, context) {
   if (MODE === "cloudflare" && CF_API_BASE) {
     try { const r = await fetch(CF_API_BASE + "/api/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message, context }) }); if (r.ok) { const d = await r.json(); return d.reply; } } catch(e) { console.warn(e); }
   }
-  return "\u{1F4AC} Le chat IA sera disponible une fois le backend Cloudflare connect\u00e9. En attendant, pose ta question sur claude.ai !";
+  return "\u{1F4AC} Le chat IA sera disponible une fois le backend Cloudflare connecté. En attendant, pose ta question sur claude.ai !";
 }
