@@ -30,7 +30,24 @@ export function MiniStat({ label, value, color }) { return (<div style={{ flex: 
 export function Backdrop({ onClick }) { return <div onClick={onClick} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,.3)", zIndex: 200, animation: "fadeIn .2s ease" }} />; }
 export function ModalSheet({ children }) { return (<div style={{ position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 430, background: C.card, borderRadius: "16px 16px 0 0", padding: "20px 20px calc(40px + env(safe-area-inset-bottom))", zIndex: 201, animation: "slideUp .3s cubic-bezier(.25,.46,.45,.94)", maxHeight: "80vh", overflowY: "auto" }}><div style={{ width: 36, height: 5, borderRadius: 3, background: C.separator, margin: "0 auto 20px" }} />{children}</div>); }
 export function SubmitBtn({ disabled, onClick, text, color = C.accent }) { return <button onClick={onClick} disabled={disabled} style={{ width: "100%", padding: 15, marginTop: 16, borderRadius: 14, border: "none", background: disabled ? C.separator : color, color: disabled ? C.text3 : "white", fontSize: 16, fontWeight: 600, cursor: disabled ? "default" : "pointer", fontFamily: "inherit" }}>{text}</button>; }
-export function SegToggle({ options, active, onChange }) { return (<div style={{ display: "flex", margin: "14px 20px 12px", background: C.separator, borderRadius: 10, padding: 2 }}>{options.map((t) => (<button key={t.id} onClick={() => onChange(t.id)} style={{ flex: 1, padding: "9px 0", borderRadius: 8, border: "none", background: active === t.id ? C.card : "transparent", color: active === t.id ? C.text : C.text2, fontSize: 14, fontWeight: 600, cursor: "pointer", boxShadow: active === t.id ? "0 1px 3px rgba(0,0,0,.08)" : "none" }}>{t.label}</button>))}</div>); }
+export function SegToggle({ options, active, onChange }) {
+  return (
+    <div style={{ margin: "14px 20px 12px", overflowX: "auto", scrollbarWidth: "none", WebkitOverflowScrolling: "touch" }}>
+      <div style={{ display: "flex", gap: 0, background: C.separator, borderRadius: 10, padding: 2, minWidth: "fit-content" }}>
+        {options.map((t) => (
+          <button key={t.id} onClick={() => onChange(t.id)} style={{
+            padding: "9px 14px", borderRadius: 8, border: "none",
+            background: active === t.id ? C.card : "transparent",
+            color: active === t.id ? C.text : C.text2,
+            fontSize: 13, fontWeight: 600, cursor: "pointer",
+            whiteSpace: "nowrap", flexShrink: 0,
+            boxShadow: active === t.id ? "0 1px 3px rgba(0,0,0,.08)" : "none"
+          }}>{t.label}</button>
+        ))}
+      </div>
+    </div>
+  );
+}
 export function LocationLink({ location }) {
   if (!location) return null;
   return (<a href={mapsUrl(location)} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} style={{ fontSize: 11, color: C.accent, display: "flex", alignItems: "center", gap: 3, textDecoration: "none", marginTop: 2 }}><Icons.MapPin size={11} color={C.accent} />{location.length > 35 ? location.slice(0, 35) + "…" : location}</a>);

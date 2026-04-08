@@ -193,7 +193,8 @@ export function CalendarModule({ events, setEvents }) {
         </Card>
       </div>
 
-      <FAB onClick={() => setShowAdd(true)} />
+      <div style={{ height: 60 }} />
+    <FAB onClick={() => setShowAdd(true)} />
       {showAdd && (
         <AddEvModal
           def={toKey(sd)}

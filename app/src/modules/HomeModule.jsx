@@ -256,9 +256,9 @@ export function HomeModule({ st, go }) {
             </div>
           )}
         </HC>
-      </div>
+      <div style={{ height: 80 }} />
     </div>
-  );
+  </div>);
 }
 
 function HC({ title, icon, onClick, children }) {

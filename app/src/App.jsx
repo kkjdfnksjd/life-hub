@@ -154,7 +154,7 @@ export default function App() {
         position: "relative",
         fontFamily: "-apple-system,sans-serif",
         paddingTop: "max(16px,env(safe-area-inset-top))",
-        paddingBottom: "max(120px,calc(120px+env(safe-area-inset-bottom)))",
+        paddingBottom: "max(160px,calc(160px+env(safe-area-inset-bottom)))",
       }}
     >
       <div style={{ height: 18 }} />

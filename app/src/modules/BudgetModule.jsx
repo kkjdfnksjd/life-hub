@@ -164,7 +164,7 @@ function BudgetSub({ transactions, setTransactions, monthlyBudget, setMonthlyBud
         </Card>
       </div>
 
-      <div style={{ padding: "0 20px 40px" }}>
+      <div style={{ padding: "0 20px 20px" }}>
         <div style={{ fontSize: 13, fontWeight: 600, color: C.text2, textTransform: "uppercase", marginBottom: 10 }}>
           Transactions récentes
         </div>
@@ -225,7 +225,7 @@ function DCAProjection() {
   const n = years * 12;
   const futureValue = r > 0 ? monthly * ((Math.pow(1 + r, n) - 1) / r) : monthly * n;
   const gain = futureValue - totalInvested;
-  return (<div style={{ padding: "0 20px 40px" }}>
+  return (<div style={{ padding: "0 20px 20px" }}>
     <Card><div style={{ padding: 16 }}>
       <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 16 }}>Simulateur DCA</div>
       <div style={{ marginBottom: 12 }}>
@@ -285,7 +285,7 @@ function TOBHelper() {
     { type: "ETF distribuant", rate: "0,12%", cap: "Pas de plafond", color: C.orange },
     { type: "Actions individuelles", rate: "0,35%", cap: "1 600€/transaction", color: C.accent },
   ];
-  return (<div style={{ padding: "0 20px 40px" }}>
+  return (<div style={{ padding: "0 20px 20px" }}>
     <Card><div style={{ padding: 16 }}>
       <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 4 }}>Taxe sur Op\u00e9rations Boursi\u00e8res</div>
       <div style={{ fontSize: 13, color: C.text3, marginBottom: 16 }}>Belgique - D\u00e9claration trimestrielle</div>
@@ -365,7 +365,7 @@ function NewsFeed({ investments }) {
   }, [keywords.join("|")]);
 
   return (
-    <div style={{ padding: "0 20px 40px" }}>
+    <div style={{ padding: "0 20px 20px" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <Icons.Rss size={16} color={C.accent} />
@@ -569,7 +569,7 @@ function InvestSub({ investments, setInvestments }) {
     </div>}
 
     {/* Portfolio cards */}
-    <div style={{ padding: "0 20px 40px", display: "flex", flexDirection: "column", gap: 10 }}>
+    <div style={{ padding: "0 20px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
       {investments.map((p) => {
         const d = PORTFOLIOS.find((x) => x.id === p.id);
         const g = p.currentValue - p.invested;
@@ -608,6 +608,7 @@ function InvestSub({ investments, setInvestments }) {
       })}
     </div>
 
+    <div style={{ height: 80 }} />
     {showUp && <UpModal inv={investments} onUp={hUp} onClose={() => setShowUp(false)} />}
   </div>);
 }
@@ -620,7 +621,7 @@ function GoalsSub({ goals, setGoals }) {
   const deleteGoal = (id) => setGoals((p) => p.filter((g) => g.id !== id));
   const updateGoal = (id, field, val) => setGoals((p) => p.map((g) => g.id === id ? { ...g, [field]: val } : g));
 
-  return (<div style={{ padding: "0 20px 40px" }}>
+  return (<div style={{ padding: "0 20px 20px" }}>
     <div style={{ marginBottom: 12 }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <span style={{ fontSize: 13, fontWeight: 600, color: C.text2, textTransform: "uppercase", letterSpacing: 0.5 }}>Mes objectifs</span>
@@ -671,6 +672,7 @@ function GoalsSub({ goals, setGoals }) {
       </Card>);
     })}
 
+    <div style={{ height: 60 }} />
     {showAdd && <AddGoalModal onAdd={(g) => { setGoals((p) => [...p, { id: uid(), ...g }]); setShowAdd(false); }} onClose={() => setShowAdd(false)} />}
   </div>);
 }

@@ -189,7 +189,8 @@ export function TodoModule({ todos, setTodos, events, setEvents }) {
         )}
       </div>
 
-      <FAB onClick={() => setShowAdd(true)} />
+      <div style={{ height: 60 }} />
+    <FAB onClick={() => setShowAdd(true)} />
       {showAdd && <AddTodoModal onAdd={addTodo} onClose={() => setShowAdd(false)} />}
     </div>
   );
