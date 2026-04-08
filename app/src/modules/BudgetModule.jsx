@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from "react";
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { C, BUDGET_CATS, PORTFOLIOS } from "../utils/constants";
 import { uid, fmt, fmtPct, MN, today, toKey } from "../utils/helpers";
 import { Icons } from "../components/Icons";
@@ -429,23 +430,185 @@ function NewsFeed({ investments }) {
 
 
 function InvestSub({ investments, setInvestments }) {
-  const [selId, setSelId] = useState(null); const [showUp, setShowUp] = useState(false);
-  const tI = investments.reduce((s, p) => s + p.invested, 0); const tV = investments.reduce((s, p) => s + p.currentValue, 0);
-  const tG = tV - tI; const tPct = tI > 0 ? ((tV - tI) / tI) * 100 : 0;
-  const segs = investments.map((p) => ({ pct: tV > 0 ? (p.currentValue / tV) * 100 : 0, color: PORTFOLIOS.find((x) => x.id === p.id)?.color || C.text3 }));
+  const [selId, setSelId] = useState(null);
+  const [showUp, setShowUp] = useState(false);
+  const [etfPrices, setEtfPrices] = useState(null);
+  const [priceLoading, setPriceLoading] = useState(true);
+
+  // Fetch live ETF prices from Worker
+  useEffect(() => {
+    setPriceLoading(true);
+    fetch("https://life-hub-api.douzieme-phenol-4h.workers.dev/api/etf-prices")
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d) setEtfPrices(d); })
+      .catch(() => {})
+      .finally(() => setPriceLoading(false));
+  }, []);
+
+  const tI = investments.reduce((s, p) => s + p.invested, 0);
+  const tV = investments.reduce((s, p) => s + p.currentValue, 0);
+  const tG = tV - tI;
+  const tPct = tI > 0 ? ((tV - tI) / tI) * 100 : 0;
+  const segs = investments.map((p) => ({
+    pct: tV > 0 ? (p.currentValue / tV) * 100 : 0,
+    color: PORTFOLIOS.find((x) => x.id === p.id)?.color || C.text3,
+    name: PORTFOLIOS.find((x) => x.id === p.id)?.name || p.id,
+    value: p.currentValue,
+  }));
+
+  // Build chart data from all portfolios history
+  const chartData = useMemo(() => {
+    const dateMap = {};
+    investments.forEach(p => {
+      (p.history || []).forEach(h => {
+        if (!dateMap[h.date]) dateMap[h.date] = { date: h.date, total: 0, invested: 0 };
+        dateMap[h.date].total += h.value;
+        dateMap[h.date].invested += h.invested;
+      });
+    });
+    return Object.values(dateMap).sort((a, b) => a.date.localeCompare(b.date));
+  }, [investments]);
+
   const ad = investments.flatMap((p) => (p.history || []).map((h) => new Date(h.date).getTime())).filter(Boolean);
-  const lu = ad.length > 0 ? Math.max(...ad) : 0; const ds = lu ? Math.floor((Date.now() - lu) / 864e5) : 999;
-  const hUp = (pid, nv) => { setInvestments((pr) => pr.map((p) => p.id !== pid ? p : { ...p, currentValue: nv, history: [...(p.history || []), { date: toKey(new Date()), invested: p.invested, value: nv }] })); setShowUp(false); };
+  const lu = ad.length > 0 ? Math.max(...ad) : 0;
+  const ds = lu ? Math.floor((Date.now() - lu) / 864e5) : 999;
+
+  const hUp = (pid, nv) => {
+    setInvestments((pr) => pr.map((p) => p.id !== pid ? p : {
+      ...p, currentValue: nv,
+      history: [...(p.history || []), { date: toKey(new Date()), invested: p.invested, value: nv }]
+    }));
+    setShowUp(false);
+  };
+
   return (<div>
+    {/* Monthly update reminder */}
     {ds >= 25 && <div style={{ margin: "0 20px 12px", padding: "12px 16px", borderRadius: 12, background: C.orangeLight, display: "flex", alignItems: "center", gap: 10 }}><Icons.Clock size={18} color={C.orange} /><div style={{ flex: 1 }}><div style={{ fontSize: 13, fontWeight: 600, color: C.orange }}>MAJ mensuelle</div><div style={{ fontSize: 12, color: C.text2, marginTop: 2 }}>{lu ? ds + " jours" : "Jamais"}</div></div><button onClick={() => setShowUp(true)} style={{ background: C.orange, color: "white", border: "none", borderRadius: 8, padding: "6px 12px", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>MAJ</button></div>}
-    <div style={{ padding: "0 20px 12px" }}><Card><div style={{ padding: "20px 16px", display: "flex", alignItems: "center", gap: 20 }}><div style={{ position: "relative" }}><DonutChart segments={segs} /><div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}><div style={{ fontSize: 11, color: C.text2 }}>Total</div><div style={{ fontSize: 18, fontWeight: 700 }}>{fmt(tV)}</div></div></div><div style={{ flex: 1 }}><div style={{ fontSize: 13, color: C.text2, marginBottom: 4 }}>Performance</div><div style={{ fontSize: 24, fontWeight: 700, color: tG >= 0 ? C.green : C.red }}>{tG >= 0 ? "+" : ""}{fmt(tG)}</div><div style={{ fontSize: 14, color: tPct >= 0 ? C.green : C.red, fontWeight: 600, marginTop: 2 }}>{fmtPct(tPct)}</div><div style={{ fontSize: 12, color: C.text3, marginTop: 6 }}>Investi : {fmt(tI)}</div></div></div><div style={{ padding: "0 16px 16px", display: "flex", gap: 16, flexWrap: "wrap" }}>{investments.map((p) => { const d = PORTFOLIOS.find((x) => x.id === p.id); return <div key={p.id} style={{ display: "flex", alignItems: "center", gap: 5 }}><div style={{ width: 8, height: 8, borderRadius: 4, background: d?.color }} /><span style={{ fontSize: 11, color: C.text2 }}>{d?.name}</span></div>; })}</div></Card></div>
-    <div style={{ padding: "0 20px 20px", display: "flex", flexDirection: "column", gap: 10 }}>{investments.map((p) => { const d = PORTFOLIOS.find((x) => x.id === p.id); const g = p.currentValue - p.invested; const pct = p.invested > 0 ? ((p.currentValue - p.invested) / p.invested) * 100 : 0; const isO = selId === p.id;
-      return (<div key={p.id}><Card><div onClick={() => setSelId(isO ? null : p.id)} style={{ padding: "14px 16px", cursor: "pointer", display: "flex", alignItems: "center", gap: 12 }}><div style={{ width: 40, height: 40, borderRadius: 12, background: d.color + "18", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22 }}>{d.icon}</div><div style={{ flex: 1 }}><div style={{ display: "flex", alignItems: "center", gap: 8 }}><span style={{ fontSize: 16, fontWeight: 600 }}>{d.name}</span><span style={{ fontSize: 11, color: C.text3, background: C.bg, padding: "2px 8px", borderRadius: 6 }}>{d.type}</span></div><div style={{ fontSize: 12, color: C.text3, marginTop: 3 }}>{p.monthlyDCA > 0 ? "DCA " + fmt(p.monthlyDCA) + "/mois · " : ""}Investi {fmt(p.invested)}</div></div><div style={{ textAlign: "right" }}><div style={{ fontSize: 16, fontWeight: 700 }}>{fmt(p.currentValue)}</div><div style={{ fontSize: 13, fontWeight: 600, color: g >= 0 ? C.green : C.red }}>{fmtPct(pct)}</div></div><Sparkline data={(p.history || []).map((h) => ({ value: h.value }))} color={d.color} /></div>
-        {isO && <div style={{ borderTop: ".5px solid " + C.separator, padding: "12px 16px 16px" }}><div style={{ display: "flex", gap: 10, marginBottom: 14 }}><MiniStat label="Investi" value={fmt(p.invested)} /><MiniStat label="Valeur" value={fmt(p.currentValue)} /><MiniStat label="Gain" value={(g >= 0 ? "+" : "") + fmt(g)} color={g >= 0 ? C.green : C.red} /></div><div style={{ fontSize: 12, fontWeight: 600, color: C.text2, textTransform: "uppercase", letterSpacing: .5, marginBottom: 8 }}>Composition</div>{p.holdings.length === 0 ? <Empty text="Vide" /> : p.holdings.map((h, i) => (<div key={i} style={{ display: "flex", alignItems: "center", gap: 10, padding: "6px 0" }}><div style={{ flex: 1 }}><div style={{ fontSize: 14, fontWeight: 500 }}>{h.name}</div>{h.ticker && <div style={{ fontSize: 11, color: C.text3 }}>{h.ticker}</div>}</div><div style={{ width: 60, height: 3, background: C.separator, borderRadius: 2, overflow: "hidden" }}><div style={{ width: h.allocation + "%", height: "100%", background: d.color, borderRadius: 2 }} /></div><div style={{ fontSize: 13, fontWeight: 600, color: C.text2, minWidth: 36, textAlign: "right" }}>{h.allocation}%</div></div>))}<div style={{ fontSize: 12, fontWeight: 600, color: C.text2, textTransform: "uppercase", letterSpacing: .5, marginTop: 14, marginBottom: 8 }}>Historique</div><div style={{ maxHeight: 160, overflowY: "auto" }}>{(p.history || []).length === 0 ? <Empty text="Vide" /> : [...p.history].reverse().map((h, i) => { const hp = h.invested > 0 ? ((h.value - h.invested) / h.invested) * 100 : 0; return <div key={i} style={{ display: "flex", alignItems: "center", padding: "6px 0", borderTop: i > 0 ? ".5px solid " + C.separator : "none" }}><div style={{ fontSize: 13, color: C.text2, flex: 1 }}>{new Date(h.date).toLocaleDateString("fr-BE", { month: "short", year: "numeric" })}</div><div style={{ fontSize: 13, fontWeight: 500, marginRight: 12 }}>{fmt(h.value)}</div><div style={{ fontSize: 12, fontWeight: 600, color: hp >= 0 ? C.green : C.red, minWidth: 50, textAlign: "right" }}>{fmtPct(hp)}</div></div>; })}</div><button onClick={() => setShowUp(true)} style={{ marginTop: 12, width: "100%", padding: 10, borderRadius: 10, border: "none", background: d.color + "15", color: d.color, fontSize: 14, fontWeight: 600, cursor: "pointer" }}>MAJ valeur</button></div>}
-      </Card></div>); })}</div>
+
+    {/* Patrimoine total — Picsou-style summary */}
+    <div style={{ padding: "0 20px 12px" }}>
+      <Card>
+        <div style={{ padding: "20px 16px" }}>
+          <div style={{ fontSize: 13, color: C.text2, fontWeight: 500, marginBottom: 4 }}>Patrimoine investi</div>
+          <div style={{ fontSize: 32, fontWeight: 800, letterSpacing: -1, color: C.text }}>{fmt(tV)}</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 4 }}>
+            <span style={{ fontSize: 15, fontWeight: 600, color: tG >= 0 ? C.green : C.red }}>{tG >= 0 ? "+" : ""}{fmt(tG)}</span>
+            <span style={{ fontSize: 13, fontWeight: 600, color: tG >= 0 ? C.green : C.red, background: (tG >= 0 ? C.green : C.red) + "15", padding: "2px 8px", borderRadius: 6 }}>{fmtPct(tPct)}</span>
+          </div>
+          <div style={{ fontSize: 12, color: C.text3, marginTop: 6 }}>Investi : {fmt(tI)}</div>
+        </div>
+
+        {/* Recharts Pie + Legend */}
+        <div style={{ display: "flex", alignItems: "center", padding: "0 16px 16px", gap: 16 }}>
+          <div style={{ width: 100, height: 100 }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie data={segs} dataKey="value" cx="50%" cy="50%" innerRadius={30} outerRadius={48} paddingAngle={2}>
+                  {segs.map((s, i) => <Cell key={i} fill={s.color} />)}
+                </Pie>
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+          <div style={{ flex: 1 }}>
+            {investments.map((p) => {
+              const d = PORTFOLIOS.find((x) => x.id === p.id);
+              const pct = tV > 0 ? ((p.currentValue / tV) * 100).toFixed(0) : 0;
+              return (<div key={p.id} style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 0" }}>
+                <div style={{ width: 10, height: 10, borderRadius: 3, background: d?.color }} />
+                <span style={{ fontSize: 13, flex: 1 }}>{d?.name}</span>
+                <span style={{ fontSize: 13, fontWeight: 600 }}>{pct}%</span>
+              </div>);
+            })}
+          </div>
+        </div>
+      </Card>
+    </div>
+
+    {/* Performance chart — Picsou-style */}
+    {chartData.length > 1 && <div style={{ padding: "0 20px 12px" }}>
+      <Card>
+        <div style={{ padding: "16px 16px 8px" }}>
+          <span style={{ fontSize: 13, fontWeight: 600, color: C.text2, textTransform: "uppercase", letterSpacing: 0.5 }}>Performance</span>
+        </div>
+        <div style={{ padding: "0 8px 16px", height: 180 }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={chartData}>
+              <XAxis dataKey="date" tick={{ fontSize: 10 }} tickFormatter={(d) => d.slice(5)} />
+              <YAxis tick={{ fontSize: 10 }} tickFormatter={(v) => (v/1000).toFixed(0) + "k"} width={35} />
+              <Tooltip formatter={(v) => fmt(v)} labelFormatter={(l) => l} />
+              <Line type="monotone" dataKey="total" stroke={C.accent} strokeWidth={2} dot={false} name="Valeur" />
+              <Line type="monotone" dataKey="invested" stroke={C.text3} strokeWidth={1.5} strokeDasharray="4 4" dot={false} name="Investi" />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </Card>
+    </div>}
+
+    {/* Live ETF Prices */}
+    {etfPrices && Object.keys(etfPrices).length > 0 && <div style={{ padding: "0 20px 12px" }}>
+      <Card>
+        <div style={{ padding: "14px 16px 8px" }}>
+          <span style={{ fontSize: 13, fontWeight: 600, color: C.text2, textTransform: "uppercase", letterSpacing: 0.5 }}>Cours ETF</span>
+        </div>
+        {Object.values(etfPrices).map((p, i) => (
+          <div key={p.isin} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 16px", borderTop: i > 0 ? ".5px solid " + C.separator : "none" }}>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 14, fontWeight: 500 }}>{p.name}</div>
+              <div style={{ fontSize: 11, color: C.text3 }}>{p.ticker} · {p.isin}</div>
+            </div>
+            <div style={{ textAlign: "right" }}>
+              <div style={{ fontSize: 16, fontWeight: 700 }}>{p.price?.toFixed(2)} \u20ac</div>
+              <div style={{ fontSize: 12, fontWeight: 600, color: p.change >= 0 ? C.green : C.red }}>{p.change >= 0 ? "+" : ""}{p.change?.toFixed(2)}%</div>
+            </div>
+          </div>
+        ))}
+      </Card>
+    </div>}
+
+    {/* Portfolio cards */}
+    <div style={{ padding: "0 20px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
+      {investments.map((p) => {
+        const d = PORTFOLIOS.find((x) => x.id === p.id);
+        const g = p.currentValue - p.invested;
+        const pct = p.invested > 0 ? ((p.currentValue - p.invested) / p.invested) * 100 : 0;
+        const isO = selId === p.id;
+        return (<div key={p.id}><Card>
+          <div onClick={() => setSelId(isO ? null : p.id)} style={{ padding: "14px 16px", cursor: "pointer", display: "flex", alignItems: "center", gap: 12 }}>
+            <div style={{ width: 40, height: 40, borderRadius: 12, background: d.color + "18", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22 }}>{d.icon}</div>
+            <div style={{ flex: 1 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}><span style={{ fontSize: 16, fontWeight: 600 }}>{d.name}</span><span style={{ fontSize: 11, color: C.text3, background: C.bg, padding: "2px 8px", borderRadius: 6 }}>{d.type}</span></div>
+              <div style={{ fontSize: 12, color: C.text3, marginTop: 3 }}>{p.monthlyDCA > 0 ? "DCA " + fmt(p.monthlyDCA) + "/mois \u00b7 " : ""}Investi {fmt(p.invested)}</div>
+            </div>
+            <div style={{ textAlign: "right" }}><div style={{ fontSize: 16, fontWeight: 700 }}>{fmt(p.currentValue)}</div><div style={{ fontSize: 13, fontWeight: 600, color: g >= 0 ? C.green : C.red }}>{fmtPct(pct)}</div></div>
+            <Sparkline data={(p.history || []).map((h) => ({ value: h.value }))} color={d.color} />
+          </div>
+          {isO && <div style={{ borderTop: ".5px solid " + C.separator, padding: "12px 16px 16px" }}>
+            <div style={{ display: "flex", gap: 10, marginBottom: 14 }}><MiniStat label="Investi" value={fmt(p.invested)} /><MiniStat label="Valeur" value={fmt(p.currentValue)} /><MiniStat label="Gain" value={(g >= 0 ? "+" : "") + fmt(g)} color={g >= 0 ? C.green : C.red} /></div>
+            <div style={{ fontSize: 12, fontWeight: 600, color: C.text2, textTransform: "uppercase", letterSpacing: .5, marginBottom: 8 }}>Composition</div>
+            {p.holdings.length === 0 ? <Empty text="Vide" /> : p.holdings.map((h, i) => (
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, padding: "6px 0" }}>
+                <div style={{ flex: 1 }}><div style={{ fontSize: 14, fontWeight: 500 }}>{h.name}</div>{h.ticker && <div style={{ fontSize: 11, color: C.text3 }}>{h.ticker}</div>}</div>
+                <div style={{ width: 60, height: 3, background: C.separator, borderRadius: 2, overflow: "hidden" }}><div style={{ width: h.allocation + "%", height: "100%", background: d.color, borderRadius: 2 }} /></div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: C.text2, minWidth: 36, textAlign: "right" }}>{h.allocation}%</div>
+              </div>
+            ))}
+            <div style={{ fontSize: 12, fontWeight: 600, color: C.text2, textTransform: "uppercase", letterSpacing: .5, marginTop: 14, marginBottom: 8 }}>Historique</div>
+            <div style={{ maxHeight: 160, overflowY: "auto" }}>
+              {(p.history || []).length === 0 ? <Empty text="Vide" /> : [...p.history].reverse().map((h, i) => {
+                const hp = h.invested > 0 ? ((h.value - h.invested) / h.invested) * 100 : 0;
+                return <div key={i} style={{ display: "flex", alignItems: "center", padding: "6px 0", borderTop: i > 0 ? ".5px solid " + C.separator : "none" }}><div style={{ fontSize: 13, color: C.text2, flex: 1 }}>{new Date(h.date).toLocaleDateString("fr-BE", { month: "short", year: "numeric" })}</div><div style={{ fontSize: 13, fontWeight: 500, marginRight: 12 }}>{fmt(h.value)}</div><div style={{ fontSize: 12, fontWeight: 600, color: hp >= 0 ? C.green : C.red, minWidth: 50, textAlign: "right" }}>{fmtPct(hp)}</div></div>;
+              })}
+            </div>
+            <button onClick={() => setShowUp(true)} style={{ marginTop: 12, width: "100%", padding: 10, borderRadius: 10, border: "none", background: d.color + "15", color: d.color, fontSize: 14, fontWeight: 600, cursor: "pointer" }}>MAJ valeur</button>
+          </div>}
+        </Card></div>);
+      })}
+    </div>
+
     {showUp && <UpModal inv={investments} onUp={hUp} onClose={() => setShowUp(false)} />}
   </div>);
 }
+
 function UpModal({ inv, onUp, onClose }) {
   const [sel, setSel] = useState(inv[0]?.id || ""); const [val, setVal] = useState(""); const cur = inv.find((p) => p.id === sel);
   return (<><Backdrop onClick={onClose} /><ModalSheet><h3 style={{ margin: "0 0 16px", fontSize: 18, fontWeight: 600 }}>Mettre à jour</h3><div style={{ display: "flex", gap: 8, marginBottom: 14 }}>{inv.map((p) => { const d = PORTFOLIOS.find((x) => x.id === p.id); return <button key={p.id} onClick={() => { setSel(p.id); setVal(""); }} style={{ flex: 1, padding: "10px 8px", borderRadius: 10, border: "none", background: sel === p.id ? d.color : C.bg, color: sel === p.id ? "white" : C.text2, fontSize: 12, fontWeight: 600, cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}><span style={{ fontSize: 20 }}>{d.icon}</span>{d.name}</button>; })}</div>{cur && <div style={{ fontSize: 13, color: C.text2, marginBottom: 10, padding: "8px 12px", background: C.bg, borderRadius: 8 }}>Actuelle : <strong>{fmt(cur.currentValue)}</strong></div>}<div style={{ position: "relative" }}><input type="number" placeholder="Nouvelle valeur" value={val} onChange={(e) => setVal(e.target.value)} style={{ ...inputStyle, fontSize: 20, fontWeight: 700, paddingRight: 32 }} onFocus={focusBorder} onBlur={blurBorder} /><span style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", color: C.text3, fontSize: 16 }}>€</span></div><SubmitBtn disabled={!Number(val)} onClick={() => Number(val) && onUp(sel, Number(val))} text="Enregistrer" /></ModalSheet></>);
