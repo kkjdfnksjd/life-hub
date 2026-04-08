@@ -5,23 +5,26 @@ import { uid, fmt, fmtPct, MN, today, toKey } from "../utils/helpers";
 import { Icons } from "../components/Icons";
 import { Card, Empty, Pill, FAB, ProgressBar, DonutChart, Sparkline, CatIcon, SumCard, MiniStat, Backdrop, ModalSheet, SubmitBtn, SegToggle, inputStyle, focusBorder, blurBorder } from "../components/ui";
 import { fetchNewsFeed } from "../services/DataService";
-export function BudgetModule({ transactions, setTransactions, monthlyBudget, setMonthlyBudget, investments, setInvestments }) {
+export function BudgetModule({ transactions, setTransactions, monthlyBudget, setMonthlyBudget, investments, setInvestments, goals, setGoals }) {
   const [sub, setSub] = useState("dca");
 
   const safeTransactions = Array.isArray(transactions) ? transactions : [];
   const safeInvestments = Array.isArray(investments) ? investments : [];
   const safeMonthlyBudget = Number.isFinite(Number(monthlyBudget)) ? Number(monthlyBudget) : 0;
   const safeSetTransactions = typeof setTransactions === "function" ? setTransactions : () => {};
+  const safeGoals = Array.isArray(goals) ? goals : [];
+  const safeSetGoals = typeof setGoals === "function" ? setGoals : () => {};
   const safeSetInvestments = typeof setInvestments === "function" ? setInvestments : () => {};
   const safeSetMonthlyBudget = typeof setMonthlyBudget === "function" ? setMonthlyBudget : () => {};
 
   return (<div><div style={{ padding: "16px 20px 0" }}><h1 style={{ fontSize: 34, fontWeight: 700, letterSpacing: -0.5, margin: 0 }}>Finances</h1></div>
-    <SegToggle options={[{ id: "budget", label: "Budget" }, { id: "invest", label: "Investissements" }, { id: "feed", label: "Actu" }, { id: "dca", label: "Projection" }, { id: "tob", label: "TOB" }]} active={sub} onChange={setSub} />
+    <SegToggle options={[{ id: "budget", label: "Budget" }, { id: "invest", label: "Investissements" }, { id: "feed", label: "Actu" }, { id: "dca", label: "Projection" }, { id: "tob", label: "TOB" }, { id: "goals", label: "Objectifs" }]} active={sub} onChange={setSub} />
     {sub === "budget" && <BudgetSub transactions={safeTransactions} setTransactions={safeSetTransactions} monthlyBudget={safeMonthlyBudget} setMonthlyBudget={safeSetMonthlyBudget} />}
     {sub === "invest" && <InvestSub investments={safeInvestments} setInvestments={safeSetInvestments} />}
     {sub === "feed" && <NewsFeed investments={safeInvestments} />}
     {sub === "dca" && <DCAProjection />}
     {sub === "tob" && <TOBHelper />}
+    {sub === "goals" && <GoalsSub goals={safeGoals} setGoals={safeSetGoals} />}
   </div>);
 }
 
@@ -607,6 +610,108 @@ function InvestSub({ investments, setInvestments }) {
 
     {showUp && <UpModal inv={investments} onUp={hUp} onClose={() => setShowUp(false)} />}
   </div>);
+}
+
+
+function GoalsSub({ goals, setGoals }) {
+  const [showAdd, setShowAdd] = useState(false);
+  const safeGoals = Array.isArray(goals) ? goals : [];
+
+  const deleteGoal = (id) => setGoals((p) => p.filter((g) => g.id !== id));
+  const updateGoal = (id, field, val) => setGoals((p) => p.map((g) => g.id === id ? { ...g, [field]: val } : g));
+
+  return (<div style={{ padding: "0 20px 20px" }}>
+    <div style={{ marginBottom: 12 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <span style={{ fontSize: 13, fontWeight: 600, color: C.text2, textTransform: "uppercase", letterSpacing: 0.5 }}>Mes objectifs</span>
+        <button onClick={() => setShowAdd(true)} style={{ background: C.accentLight, border: "none", borderRadius: 8, padding: "5px 12px", fontSize: 12, fontWeight: 600, color: C.accent, cursor: "pointer" }}>+ Ajouter</button>
+      </div>
+    </div>
+
+    {safeGoals.length === 0 ? <Card><Empty text="Aucun objectif. Ajoute ton premier objectif financier !" /></Card> : safeGoals.map((goal) => {
+      const pct = goal.target > 0 ? Math.min((goal.current / goal.target) * 100, 100) : 0;
+      const remaining = Math.max(goal.target - goal.current, 0);
+      const isComplete = pct >= 100;
+      const daysLeft = goal.deadline ? Math.ceil((new Date(goal.deadline + "T12:00:00") - new Date()) / 864e5) : null;
+
+      return (<Card key={goal.id} style={{ marginBottom: 10 }}>
+        <div style={{ padding: 16 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{ fontSize: 20 }}>{goal.icon || "\u{1F3AF}"}</span>
+              <div>
+                <div style={{ fontSize: 15, fontWeight: 600 }}>{goal.name}</div>
+                {goal.deadline && <div style={{ fontSize: 11, color: daysLeft <= 0 ? C.red : daysLeft <= 30 ? C.orange : C.text3 }}>{daysLeft <= 0 ? "Deadline passee" : daysLeft + " jours restants"}</div>}
+              </div>
+            </div>
+            <button onClick={() => deleteGoal(goal.id)} style={{ background: "none", border: "none", cursor: "pointer", opacity: 0.3, padding: 4 }}><Icons.Trash size={16} color={C.text3} /></button>
+          </div>
+
+          <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginBottom: 6 }}>
+            <span style={{ fontSize: 22, fontWeight: 700, color: isComplete ? C.green : C.text }}>{fmt(goal.current)}</span>
+            <span style={{ fontSize: 13, color: C.text3 }}>/ {fmt(goal.target)}</span>
+          </div>
+
+          <div style={{ height: 6, background: C.separator, borderRadius: 3, overflow: "hidden", marginBottom: 8 }}>
+            <div style={{ width: pct + "%", height: "100%", background: isComplete ? C.green : pct > 60 ? C.accent : C.orange, borderRadius: 3, transition: "width 0.4s ease" }} />
+          </div>
+
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span style={{ fontSize: 12, color: C.text3 }}>{Math.round(pct)}% atteint</span>
+            {!isComplete && <span style={{ fontSize: 12, color: C.text2, fontWeight: 500 }}>Reste : {fmt(remaining)}</span>}
+            {isComplete && <span style={{ fontSize: 12, color: C.green, fontWeight: 600 }}>Objectif atteint !</span>}
+          </div>
+
+          {!isComplete && <div style={{ marginTop: 10 }}>
+            <input type="number" placeholder="Mettre a jour le montant actuel" style={{ ...inputStyle, fontSize: 14, padding: "10px 12px" }}
+              onKeyDown={(e) => { if (e.key === "Enter" && Number(e.target.value) > 0) { updateGoal(goal.id, "current", Number(e.target.value)); e.target.value = ""; } }}
+              onFocus={focusBorder} onBlur={blurBorder} />
+          </div>}
+        </div>
+      </Card>);
+    })}
+
+    {showAdd && <AddGoalModal onAdd={(g) => { setGoals((p) => [...p, { id: uid(), ...g }]); setShowAdd(false); }} onClose={() => setShowAdd(false)} />}
+  </div>);
+}
+
+function AddGoalModal({ onAdd, onClose }) {
+  const [name, setName] = useState("");
+  const [target, setTarget] = useState("");
+  const [current, setCurrent] = useState("");
+  const [deadline, setDeadline] = useState("");
+  const [icon, setIcon] = useState("\u{1F3AF}");
+  const ref = useRef(null);
+  useEffect(() => { setTimeout(() => ref.current?.focus(), 100); }, []);
+
+  const icons = ["\u{1F3AF}", "\u{1F3E0}", "\u{2708}\uFE0F", "\u{1F697}", "\u{1F4B0}", "\u{1F393}", "\u{1F4BB}", "\u{2764}\uFE0F"];
+
+  return (<><Backdrop onClick={onClose} /><ModalSheet>
+    <h3 style={{ margin: "0 0 16px", fontSize: 18, fontWeight: 600 }}>Nouvel objectif</h3>
+    <input ref={ref} type="text" placeholder="Nom (ex: Renovation cuisine)" value={name} onChange={(e) => setName(e.target.value)} style={inputStyle} onFocus={focusBorder} onBlur={blurBorder} />
+
+    <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+      {icons.map((ic) => (<button key={ic} onClick={() => setIcon(ic)} style={{ width: 40, height: 40, borderRadius: 10, border: icon === ic ? "2px solid " + C.accent : "1.5px solid " + C.separator, background: icon === ic ? C.accentLight : "transparent", fontSize: 20, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>{ic}</button>))}
+    </div>
+
+    <div style={{ display: "flex", gap: 10, marginTop: 10 }}>
+      <div style={{ flex: 1, position: "relative" }}>
+        <input type="number" placeholder="Objectif" value={target} onChange={(e) => setTarget(e.target.value)} style={{ ...inputStyle, paddingRight: 28 }} onFocus={focusBorder} onBlur={blurBorder} />
+        <span style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", color: C.text3, fontSize: 14 }}>€</span>
+      </div>
+      <div style={{ flex: 1, position: "relative" }}>
+        <input type="number" placeholder="Deja epargne" value={current} onChange={(e) => setCurrent(e.target.value)} style={{ ...inputStyle, paddingRight: 28 }} onFocus={focusBorder} onBlur={blurBorder} />
+        <span style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", color: C.text3, fontSize: 14 }}>€</span>
+      </div>
+    </div>
+
+    <div style={{ marginTop: 10 }}>
+      <label style={{ fontSize: 13, color: C.text2 }}>Deadline (optionnel)</label>
+      <input type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} style={{ ...inputStyle, marginTop: 6, padding: "12px 16px", fontSize: 14 }} />
+    </div>
+
+    <SubmitBtn disabled={!name.trim() || !Number(target)} onClick={() => name.trim() && Number(target) && onAdd({ name: name.trim(), target: Number(target), current: Number(current) || 0, deadline, icon })} text="Ajouter" />
+  </ModalSheet></>);
 }
 
 function UpModal({ inv, onUp, onClose }) {
