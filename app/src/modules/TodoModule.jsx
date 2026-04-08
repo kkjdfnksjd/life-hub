@@ -150,7 +150,7 @@ export function TodoModule({ todos, setTodos, events, setEvents }) {
         })}
       </div>
 
-      <div style={{ padding: "8px 20px" }}>
+      <div style={{ padding: "8px 20px 40px" }}>
         <Card>
           {sorted.length === 0 ? (
             <Empty text="Aucune tâche." />

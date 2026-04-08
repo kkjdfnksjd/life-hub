@@ -173,7 +173,7 @@ export function CalendarModule({ events, setEvents }) {
         </span>
       </div>
 
-      <div style={{ padding: "4px 20px 20px" }}>
+      <div style={{ padding: "4px 20px 40px" }}>
         <Card>
           {up.length === 0 ? (
             <Empty text="Rien" />

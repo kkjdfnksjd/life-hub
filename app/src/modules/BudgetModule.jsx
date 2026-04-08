@@ -164,7 +164,7 @@ function BudgetSub({ transactions, setTransactions, monthlyBudget, setMonthlyBud
         </Card>
       </div>
 
-      <div style={{ padding: "0 20px 20px" }}>
+      <div style={{ padding: "0 20px 40px" }}>
         <div style={{ fontSize: 13, fontWeight: 600, color: C.text2, textTransform: "uppercase", marginBottom: 10 }}>
           Transactions récentes
         </div>
@@ -225,7 +225,7 @@ function DCAProjection() {
   const n = years * 12;
   const futureValue = r > 0 ? monthly * ((Math.pow(1 + r, n) - 1) / r) : monthly * n;
   const gain = futureValue - totalInvested;
-  return (<div style={{ padding: "0 20px 20px" }}>
+  return (<div style={{ padding: "0 20px 40px" }}>
     <Card><div style={{ padding: 16 }}>
       <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 16 }}>Simulateur DCA</div>
       <div style={{ marginBottom: 12 }}>
@@ -285,7 +285,7 @@ function TOBHelper() {
     { type: "ETF distribuant", rate: "0,12%", cap: "Pas de plafond", color: C.orange },
     { type: "Actions individuelles", rate: "0,35%", cap: "1 600€/transaction", color: C.accent },
   ];
-  return (<div style={{ padding: "0 20px 20px" }}>
+  return (<div style={{ padding: "0 20px 40px" }}>
     <Card><div style={{ padding: 16 }}>
       <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 4 }}>Taxe sur Op\u00e9rations Boursi\u00e8res</div>
       <div style={{ fontSize: 13, color: C.text3, marginBottom: 16 }}>Belgique - D\u00e9claration trimestrielle</div>
@@ -365,7 +365,7 @@ function NewsFeed({ investments }) {
   }, [keywords.join("|")]);
 
   return (
-    <div style={{ padding: "0 20px 20px" }}>
+    <div style={{ padding: "0 20px 40px" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <Icons.Rss size={16} color={C.accent} />
@@ -493,7 +493,7 @@ function InvestSub({ investments, setInvestments }) {
       <Card>
         <div style={{ padding: "20px 16px" }}>
           <div style={{ fontSize: 13, color: C.text2, fontWeight: 500, marginBottom: 4 }}>Patrimoine investi</div>
-          <div style={{ fontSize: 32, fontWeight: 800, letterSpacing: -1, color: C.text }}>{fmt(tV)}</div>
+          <div style={{ fontSize: 28, fontWeight: 800, letterSpacing: -1, color: C.text, wordBreak: "break-word" }}>{fmt(tV)}</div>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 4 }}>
             <span style={{ fontSize: 15, fontWeight: 600, color: tG >= 0 ? C.green : C.red }}>{tG >= 0 ? "+" : ""}{fmt(tG)}</span>
             <span style={{ fontSize: 13, fontWeight: 600, color: tG >= 0 ? C.green : C.red, background: (tG >= 0 ? C.green : C.red) + "15", padding: "2px 8px", borderRadius: 6 }}>{fmtPct(tPct)}</span>
@@ -556,7 +556,7 @@ function InvestSub({ investments, setInvestments }) {
         {Object.values(etfPrices).map((p, i) => (
           <div key={p.isin} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 16px", borderTop: i > 0 ? ".5px solid " + C.separator : "none" }}>
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 14, fontWeight: 500 }}>{p.name}</div>
+              <div style={{ fontSize: 14, fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.name}</div>
               <div style={{ fontSize: 11, color: C.text3 }}>{p.ticker} · {p.isin}</div>
             </div>
             <div style={{ textAlign: "right" }}>
@@ -569,7 +569,7 @@ function InvestSub({ investments, setInvestments }) {
     </div>}
 
     {/* Portfolio cards */}
-    <div style={{ padding: "0 20px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
+    <div style={{ padding: "0 20px 40px", display: "flex", flexDirection: "column", gap: 10 }}>
       {investments.map((p) => {
         const d = PORTFOLIOS.find((x) => x.id === p.id);
         const g = p.currentValue - p.invested;
@@ -620,7 +620,7 @@ function GoalsSub({ goals, setGoals }) {
   const deleteGoal = (id) => setGoals((p) => p.filter((g) => g.id !== id));
   const updateGoal = (id, field, val) => setGoals((p) => p.map((g) => g.id === id ? { ...g, [field]: val } : g));
 
-  return (<div style={{ padding: "0 20px 20px" }}>
+  return (<div style={{ padding: "0 20px 40px" }}>
     <div style={{ marginBottom: 12 }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <span style={{ fontSize: 13, fontWeight: 600, color: C.text2, textTransform: "uppercase", letterSpacing: 0.5 }}>Mes objectifs</span>

@@ -157,7 +157,7 @@ export function HomeModule({ st, go }) {
                 return (
                   <div key={ev.id} style={{ display: "flex", alignItems: "center", gap: 8 }}>
                     <div style={{ width: 4, height: 20, borderRadius: 2, background: cat.color }} />
-                    <span style={{ fontSize: 14, fontWeight: 500, flex: 1 }}>{ev.title}</span>
+                    <span style={{ fontSize: 14, fontWeight: 500, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{ev.title}</span>
                     <span style={{ fontSize: 11, color: C.text3 }}>{formatEventLabel(ev)}</span>
                   </div>
                 );
@@ -249,7 +249,7 @@ export function HomeModule({ st, go }) {
                 return (
                   <div key={n.id} style={{ display: "flex", alignItems: "center", gap: 8 }}>
                     <span style={{ fontSize: 16 }}>{cat.icon}</span>
-                    <span style={{ fontSize: 14, fontWeight: 500, flex: 1 }}>{n.title}</span>
+                    <span style={{ fontSize: 14, fontWeight: 500, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{n.title}</span>
                   </div>
                 );
               })}
