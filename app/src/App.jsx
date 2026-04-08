@@ -214,7 +214,7 @@ export default function App() {
 
       <BottomNav activeTab={currentTab} onTabChange={(t) => uf("activeTab", t)} />
 
-      {showSettings && <SettingsModal onClose={() => setShowSettings(false)} onReset={onReset} />}
+      {showSettings && <SettingsModal onClose={() => setShowSettings(false)} onReset={onReset} passphrase={sp} onImport={(s) => { setSt(s); setShowSettings(false); }} />}
       {showChat && <ChatPanel appState={st} onClose={() => setShowChat(false)} />}
     </div>
   );

@@ -75,5 +75,6 @@ export const EMPTY_STATE = {
   activeTab: "home", todos: [], transactions: [], monthlyBudget: 2000,
   investments: EMPTY_INVESTMENTS, events: [], notes: [], newsFeed: [], chatHistory: [],
   goals: [],
+  _version: 2,
 };
 export const mapsUrl = (a) => "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(a);

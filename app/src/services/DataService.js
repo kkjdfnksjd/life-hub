@@ -37,13 +37,14 @@ export async function loadState(passphrase) {
     todos: Array.isArray(decrypted?.todos) ? decrypted.todos : [],
     events: Array.isArray(decrypted?.events) ? decrypted.events : [],
     transactions: Array.isArray(decrypted?.transactions) ? decrypted.transactions : [],
+    goals: Array.isArray(decrypted?.goals) ? decrypted.goals : [],
     monthlyBudget: Number.isFinite(Number(decrypted?.monthlyBudget)) ? Number(decrypted.monthlyBudget) : EMPTY_STATE.monthlyBudget,
   };
 }
 
 export async function createVault(passphrase) {
   clearLegacyStorage();
-  const state = { ...EMPTY_STATE };
+  const state = { ...EMPTY_STATE, _version: 2 };
   await saveState(state, passphrase);
   return state;
 }
@@ -119,4 +120,55 @@ export async function sendChatMessage(message, context) {
   }
 
   return "💬 Le chat IA sera disponible une fois le backend Cloudflare connecté. En attendant, pose ta question sur claude.ai !";
+}
+
+// ============================================================
+// EXPORT / IMPORT BACKUP
+// ============================================================
+
+export async function exportState(passphrase) {
+  const state = await loadState(passphrase);
+  if (!state) return null;
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "life-hub-backup-" + new Date().toISOString().slice(0, 10) + ".json";
+  a.click();
+  URL.revokeObjectURL(url);
+  return true;
+}
+
+export async function importState(file, passphrase) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      try {
+        const imported = JSON.parse(e.target.result);
+        // Validate basic structure
+        if (!imported || typeof imported !== "object") throw new Error("Invalid format");
+        // Merge with defaults for safety
+        const safe = {
+          ...EMPTY_STATE,
+          ...imported,
+          activeTab: "home",
+          todos: Array.isArray(imported.todos) ? imported.todos : [],
+          transactions: Array.isArray(imported.transactions) ? imported.transactions : [],
+          investments: Array.isArray(imported.investments) ? imported.investments : EMPTY_INVESTMENTS,
+          events: Array.isArray(imported.events) ? imported.events : [],
+          notes: Array.isArray(imported.notes) ? imported.notes : [],
+          goals: Array.isArray(imported.goals) ? imported.goals : [],
+          chatHistory: [],
+          newsFeed: [],
+          _version: 2,
+        };
+        await saveState(safe, passphrase);
+        resolve(safe);
+      } catch (err) {
+        reject(err);
+      }
+    };
+    reader.onerror = reject;
+    reader.readAsText(file);
+  });
 }
