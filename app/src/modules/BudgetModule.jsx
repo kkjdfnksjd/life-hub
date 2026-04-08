@@ -278,9 +278,9 @@ function TOBHelper() {
   ];
   const currentQ = Math.floor(today.getMonth() / 3);
   const rules = [
-    { type: "ETF capitalisant (BE)", rate: "1,32%", cap: "4 000\u20ac/transaction", color: C.red },
+    { type: "ETF capitalisant (BE)", rate: "1,32%", cap: "4 000€/transaction", color: C.red },
     { type: "ETF distribuant", rate: "0,12%", cap: "Pas de plafond", color: C.orange },
-    { type: "Actions individuelles", rate: "0,35%", cap: "1 600\u20ac/transaction", color: C.accent },
+    { type: "Actions individuelles", rate: "0,35%", cap: "1 600€/transaction", color: C.accent },
   ];
   return (<div style={{ padding: "0 20px 20px" }}>
     <Card><div style={{ padding: 16 }}>
@@ -557,7 +557,7 @@ function InvestSub({ investments, setInvestments }) {
               <div style={{ fontSize: 11, color: C.text3 }}>{p.ticker} · {p.isin}</div>
             </div>
             <div style={{ textAlign: "right" }}>
-              <div style={{ fontSize: 16, fontWeight: 700 }}>{p.price?.toFixed(2)} \u20ac</div>
+              <div style={{ fontSize: 16, fontWeight: 700 }}>{p.price?.toFixed(2)} €</div>
               <div style={{ fontSize: 12, fontWeight: 600, color: p.change >= 0 ? C.green : C.red }}>{p.change >= 0 ? "+" : ""}{p.change?.toFixed(2)}%</div>
             </div>
           </div>
